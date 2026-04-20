@@ -100,10 +100,70 @@ songs.csv ───┘   [× 20 songs]                         ├──► sort
 pip install -r requirements.txt
 ```
 
-3. Run the app:
+3. Run the CLI:
 
 ```bash
-python -m src.main
+PYTHONPATH=src python src/main.py
+```
+
+### Sample Output
+
+```
+============================================================
+  ** MUSIC RECOMMENDATIONS **
+  Profile: indie pop / happy
+============================================================
+
+  #1  Rooftop Lights  —  Indigo Parade
+       Score : 6.64
+       Genre : indie pop  |  Mood: happy
+       Why   : genre match (indie pop)
+               mood match (happy)
+               energy similarity 0.99
+               valence similarity 0.97
+               tempo similarity 0.95
+               danceability similarity 0.98
+               acousticness similarity 0.90
+
+  #2  Sunrise City  —  Neon Echo
+       Score : 4.59
+       Genre : pop  |  Mood: happy
+       Why   : mood match (happy)
+               energy similarity 0.93
+               valence similarity 0.94
+               tempo similarity 0.98
+               danceability similarity 0.99
+               acousticness similarity 0.93
+
+  #3  K-Town Bounce  —  Hyper Clique
+       Score : 4.35
+       Genre : k-pop  |  Mood: happy
+       Why   : mood match (happy)
+               energy similarity 0.87
+               valence similarity 0.88
+               tempo similarity 0.94
+               danceability similarity 0.87
+               acousticness similarity 0.83
+
+  #4  Golden Cipher  —  Block Theory
+       Score : 3.04
+       Genre : hip-hop  |  Mood: confident
+       Why   : energy similarity 0.97
+               valence similarity 0.94
+               tempo similarity 0.90
+               danceability similarity 0.95
+               acousticness similarity 0.87
+
+  #5  Night Drive Loop  —  Neon Echo
+       Score : 2.97
+       Genre : synthwave  |  Mood: moody
+       Why   : energy similarity 1.00
+               valence similarity 0.71
+               tempo similarity 0.97
+               danceability similarity 0.93
+               acousticness similarity 0.97
+
+============================================================
 ```
 
 ### Running Tests
