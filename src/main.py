@@ -10,13 +10,22 @@ You will implement the functions in recommender.py:
 """
 
 from recommender import load_songs, recommend_songs
-
-
+# spotify
+# - matrix factorization - comparing libraries, NLP for web, blogs, CNNs - audio models
+    # 
 def main() -> None:
     songs = load_songs("data/songs.csv") 
 
-    # Starter example profile
-    user_prefs = {"genre": "pop", "mood": "happy", "energy": 0.8}
+    # Full taste profile — enough axes to separate "intense rock" from "chill lofi"
+    user_prefs = {
+        "genre":        "indie pop",   # primary genre signal (one-hot match)
+        "mood":         "happy",       # categorical mood preference
+        "energy":       0.75,          # moderately high — energetic but not brutal
+        "tempo_bpm":    115,           # mid-to-fast; avoids sleepy ambient AND thrash metal
+        "valence":      0.78,          # positive / uplifting feel
+        "danceability": 0.80,          # likes groove; discriminates rock vs. pop
+        "acousticness": 0.25,          # slight preference for produced sound over raw acoustic
+    }
 
     recommendations = recommend_songs(user_prefs, songs, k=5)
 

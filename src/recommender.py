@@ -59,9 +59,50 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     Scores a single song against user preferences.
     Required by recommend_songs() and src/main.py
     """
-    # TODO: Implement scoring logic using your Algorithm Recipe from Phase 2.
-    # Expected return format: (score, reasons)
-    return []
+    score = 0.0
+    reasons = []
+
+    # +2.0 for genre match
+    if song.get("genre") == user_prefs.get("genre"):
+        score += 2.0
+        reasons.append(f"genre match ({song['genre']})")
+
+    # +1.5 for mood match
+    if song.get("mood") == user_prefs.get("mood"):
+        score += 1.5
+        reasons.append(f"mood match ({song['mood']})")
+
+    # +1.0 × proximity for energy (0–1 scale)
+    if "energy" in user_prefs and "energy" in song:
+        energy_sim = 1.0 - abs(float(user_prefs["energy"]) - float(song["energy"]))
+        score += 1.0 * energy_sim
+        reasons.append(f"energy similarity {energy_sim:.2f}")
+
+    # +0.75 × proximity for valence (0–1 scale)
+    if "valence" in user_prefs and "valence" in song:
+        valence_sim = 1.0 - abs(float(user_prefs["valence"]) - float(song["valence"]))
+        score += 0.75 * valence_sim
+        reasons.append(f"valence similarity {valence_sim:.2f}")
+
+    # +0.5 × proximity for tempo (normalized over 200 bpm range)
+    if "tempo_bpm" in user_prefs and "tempo_bpm" in song:
+        tempo_sim = 1.0 - min(abs(float(user_prefs["tempo_bpm"]) - float(song["tempo_bpm"])) / 200.0, 1.0)
+        score += 0.5 * tempo_sim
+        reasons.append(f"tempo similarity {tempo_sim:.2f}")
+
+    # +0.5 × proximity for danceability (0–1 scale)
+    if "danceability" in user_prefs and "danceability" in song:
+        dance_sim = 1.0 - abs(float(user_prefs["danceability"]) - float(song["danceability"]))
+        score += 0.5 * dance_sim
+        reasons.append(f"danceability similarity {dance_sim:.2f}")
+
+    # +0.5 × proximity for acousticness (0–1 scale)
+    if "acousticness" in user_prefs and "acousticness" in song:
+        acoustic_sim = 1.0 - abs(float(user_prefs["acousticness"]) - float(song["acousticness"]))
+        score += 0.5 * acoustic_sim
+        reasons.append(f"acousticness similarity {acoustic_sim:.2f}")
+
+    return (score, reasons)
 
 def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tuple[Dict, float, str]]:
     """
