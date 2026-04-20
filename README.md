@@ -11,23 +11,75 @@ Your goal is to:
 - Evaluate what your system gets right and wrong
 - Reflect on how this mirrors real world AI recommenders
 
-Replace this paragraph with your own summary of what your version does.
+This system scores every song in a 20-song catalog against a user taste profile and returns the top-K matches ranked by a weighted point total. It combines categorical preference matching (genre, mood) with continuous audio-feature proximity (energy, valence, tempo, danceability, acousticness) to produce explainable recommendations.
 
 ---
 
 ## How The System Works
 
-Explain your design in plain language.
+### Song Features
 
-Some prompts to answer:
+Each song carries 7 scoreable attributes loaded from `data/songs.csv`:
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+| Feature | Type | Range |
+|---|---|---|
+| `genre` | categorical | pop, rock, lofi, jazz, metal, blues, … |
+| `mood` | categorical | happy, chill, intense, moody, focused, … |
+| `energy` | float | 0.0 – 1.0 |
+| `tempo_bpm` | float | ~50 – 180 |
+| `valence` | float | 0.0 – 1.0 (sad → joyful) |
+| `danceability` | float | 0.0 – 1.0 |
+| `acousticness` | float | 0.0 – 1.0 |
 
-You can include a simple diagram or bullet list if helpful.
+### User Profile
+
+The user profile is a dictionary of target values for each feature above, for example:
+
+```python
+user_prefs = {
+    "genre":        "indie pop",
+    "mood":         "happy",
+    "energy":       0.75,
+    "tempo_bpm":    115,
+    "valence":      0.78,
+    "danceability": 0.80,
+    "acousticness": 0.25,
+}
+```
+
+### Algorithm Recipe — Scoring Logic
+
+Each song is scored against the profile using additive weighted rules. Maximum possible score is **6.75 points**.
+
+| Signal | Weight | Rule |
+|---|---|---|
+| Genre match | **+2.0** | Exact string match |
+| Mood match | **+1.5** | Exact string match |
+| Energy proximity | **+1.0** | `1.0 − │user − song│` |
+| Valence proximity | **+0.75** | `1.0 − │user − song│` |
+| Tempo proximity | **+0.50** | `1.0 − │diff / 200│` (normalized) |
+| Danceability proximity | **+0.50** | `1.0 − │user − song│` |
+| Acousticness proximity | **+0.50** | `1.0 − │user − song│` |
+
+All songs are scored, sorted descending, and the top K are returned with a plain-language explanation built from the contributing reasons.
+
+### Data Flow
+
+```
+User Prefs ──┐
+             ├──► score_song() ──► (score, reasons) ──┐
+songs.csv ───┘   [× 20 songs]                         ├──► sort ──► Top-K
+                                                       │
+                                              scored_songs list
+```
+
+### Known Biases and Limitations
+
+- **Genre over-weighting:** At 2.0 points, genre dominates. A perfect-audio-match song in the wrong genre will almost always rank below a mediocre same-genre song. This can bury genuinely similar songs that just have a different label (e.g., "indie pop" vs. "pop").
+- **Mood label brittleness:** `"relaxed"` and `"chill"` feel similar to a human but score 0 against each other. The system treats mood as a binary hit/miss, not a spectrum.
+- **Catalog bias:** The 20-song catalog was hand-authored. Genres the author knows well (pop, lofi) have more songs and more variation, so those users get better recommendations by default.
+- **Single-user assumption:** The profile is one fixed dict. There is no history, no feedback loop, and no way to express "I like chill *except* during workouts."
+- **No diversity enforcement:** The top-K could return 5 nearly identical songs if the catalog has a cluster. A real system would add a diversity penalty.
 
 ---
 
